@@ -101,9 +101,15 @@ haven-os-web.zip
 └── index.html      ← open this in any browser
 ```
 
+**Direct download (always latest):**
+
+- ZIP: <https://github.com/Khawrzm/Haven_OS/raw/main/releases/haven-os-web.zip>
+- Release page: <https://github.com/Khawrzm/Haven_OS/releases/tag/v1.0.0>
+- SHA-256: see [`releases/SHA256SUMS`](releases/SHA256SUMS)
+
 **On iPhone / iPad:**
 
-1. Download the ZIP from the Releases page.
+1. Open the direct ZIP link above in Safari — it lands in Files.
 2. Tap it in Files — iOS unpacks it automatically.
 3. Long-press `index.html` → Share → Open in Safari.
 4. (Optional) Tap the Share icon → "Add to Home Screen". HAVEN OS now
