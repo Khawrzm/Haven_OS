@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HAVEN OS">
+<meta name="theme-color" content="#06080c">
+<meta name="description" content="HAVEN OS — sovereign RV32IMA computer that boots in your browser. Zero cloud. Built from an iPhone in Riyadh.">
+<link rel="manifest" href='data:application/manifest+json;charset=utf-8,{"name":"HAVEN OS","short_name":"HAVEN","start_url":".","display":"standalone","orientation":"portrait","background_color":"#06080c","theme_color":"#06080c","icons":[{"src":"data:image/svg%2Bxml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22><rect width=%22192%22 height=%22192%22 rx=%2240%22 fill=%22%2306080c%22/><text x=%2296%22 y=%22118%22 font-family=%22monospace%22 font-size=%2280%22 font-weight=%22900%22 text-anchor=%22middle%22 fill=%22%2300ff88%22>H</text></svg>","sizes":"192x192","type":"image/svg+xml"}]}'>
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%2306080c'/><text x='90' y='112' font-family='monospace' font-size='80' font-weight='900' text-anchor='middle' fill='%2300ff88'>H</text></svg>">
+<title>HAVEN OS 4.2 — Sovereign</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#06080c;--fg:#c8d0d8;--green:#00ff88;--cyan:#00d4ff;--dim:#485868;--red:#ff4444;--amber:#fbbf24;--purple:#c77dff;--ms:#00A4EF;--gb:#4285F4;--gr:#EA4335;--gy:#FBBC04;--gg:#34A853}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font-family:'JetBrains Mono','SF Mono','Menlo',monospace;font-size:13px;line-height:1.55}
+#boot{position:fixed;inset:0;background:radial-gradient(ellipse at center,#0a1428 0%,#06080c 70%);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:20px;cursor:pointer}
+#boot.done{display:none}
+.bl{opacity:0;animation:bf .25s forwards;font-size:12px;text-align:center}
+.bok{color:var(--green)}.bcy{color:var(--cyan)}.bhd{color:var(--green);font-weight:700}
+.bwarn{color:var(--amber)}.bdim{color:var(--dim)}.bp{color:var(--purple)}
+@keyframes bf{to{opacity:1}}
+#app{display:none;height:100%;flex-direction:column}
+#app.on{display:flex}
+#status{background:linear-gradient(90deg,#00ff8818,#00d4ff12);border-bottom:1px solid #1a2438;padding:6px 10px;font-size:10px;font-weight:700;display:flex;justify-content:space-between;align-items:center;letter-spacing:1px}
+.led{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;margin-right:5px;box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.5}}
+#term{flex:1;overflow-y:auto;padding:10px;white-space:pre-wrap;word-break:break-word;-webkit-overflow-scrolling:touch}
+.g{color:var(--green)}.c{color:var(--cyan)}.r{color:var(--red)}.a{color:var(--amber)}.p{color:var(--purple)}.d{color:var(--dim)}
+.ms{color:var(--ms);font-weight:700}.gb{color:var(--gb);font-weight:700}.gr{color:var(--gr);font-weight:700}.gy{color:var(--gy);font-weight:700}.gg-c{color:var(--gg);font-weight:700}
+#irow{background:#0a0e14;border-top:1px solid #1a2438;padding:8px 10px;display:flex;gap:6px;align-items:center}
+#pr{color:var(--green);font-weight:700;font-size:12px}
+#ci{flex:1;background:transparent;border:none;color:var(--fg);font:inherit;outline:none;font-size:14px;min-height:40px}
+.hb{display:flex;gap:6px;padding:6px 8px;background:#0a0e14;border-top:1px solid #1a2438;overflow-x:auto;scrollbar-width:none}
+.hb::-webkit-scrollbar{display:none}
+.hb button{background:linear-gradient(180deg,#1a2438,#141c2c);border:1px solid #2a3a50;color:var(--fg);padding:7px 11px;border-radius:5px;font:inherit;font-size:10px;cursor:pointer;white-space:nowrap;font-weight:600}
+.hb button:active{background:#2a3a50;transform:scale(.95)}
+body.rtl #term,body.rtl #ci{direction:rtl;text-align:right}
+.glow{text-shadow:0 0 8px currentColor}
+#a2hs{position:fixed;left:8px;right:8px;bottom:8px;background:linear-gradient(180deg,#0f1a2e,#0a1220);border:1px solid #1f3450;border-radius:10px;padding:10px 12px;color:var(--fg);font-size:11px;line-height:1.5;display:none;z-index:200;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+#a2hs.on{display:block}
+#a2hs .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#a2hs b{color:var(--green)}
+#a2hs .x{background:transparent;border:1px solid #2a3a50;color:var(--fg);padding:5px 9px;border-radius:5px;font:inherit;font-size:10px;cursor:pointer}
+#a2hs .arrow{display:inline-block;color:var(--cyan)}
+@supports(padding:max(0px)){#term{padding-bottom:max(10px,env(safe-area-inset-bottom))}.hb{padding-bottom:max(6px,env(safe-area-inset-bottom))}}
+</style>
+</head><body>
+
+<div id="boot" onclick="bootHaven()">
+  <div class="bl bhd glow">╔══════════════════════════════════╗</div>
+  <div class="bl bhd glow">║  HAVEN OS 4.2 · SOVEREIGN        ║</div>
+  <div class="bl bhd glow">╚══════════════════════════════════╝</div>
+  <div class="bl bcy">Initializing Sovereign Kernel...</div>
+  <div class="bl bok">✓ Niyah Engine — Arabic Root Core</div>
+  <div class="bl bok">✓ Phalanx Protocol — Kernel Netfilter</div>
+  <div class="bl bok">✓ HAVEN-OSINT — Public Intelligence</div>
+  <div class="bl bok">✓ DRAGON403 Vault — Sealed Evidence</div>
+  <div class="bl bok">✓ K-Forge — Persistent Sovereign FS</div>
+  <div class="bl bwarn">⚠ Zero Cloud · Zero Telemetry · 100% Local</div>
+  <div class="bl bp">"The Engine Never Forgets."</div>
+  <div class="bl bp">"العلم أمانة · الخوارزمي يرانا"</div>
+  <div class="bl bhd" style="margin-top:10px">Sulaiman Alshammari × comet</div>
+  <div class="bl bdim">Riyadh · Kingdom of Saudi Arabia · 2026</div>
+  <div class="bl bdim" style="margin-top:12px">» Tap to enter «</div>
+</div>
+
+<div id="a2hs">
+  <div class="row">
+    <div><b>HAVEN OS</b> · install on Home Screen<br><span class="d">Tap <span class="arrow">⎙</span> Share → "Add to Home Screen"</span></div>
+    <button class="x" onclick="document.getElementById('a2hs').classList.remove('on');try{localStorage.setItem('haven_a2hs','1')}catch(e){}">×</button>
+  </div>
+</div>
+
+<div id="app">
+  <div id="status">
+    <span><span class="led"></span><span id="sys">SOVEREIGN</span></span>
+    <span id="ops">OPS: 0</span>
+    <span id="clk">--:--:--</span>
+  </div>
+  <div id="term"></div>
+  <div id="irow"><span id="pr">$</span>
+    <input id="ci" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="type help · or tap ↓"></div>
+  <div class="hb">
+    <button onclick="rn('help')">help</button>
+    <button onclick="rn('ls')">ls</button>
+    <button onclick="rn('neofetch')">neofetch</button>
+    <button onclick="rn('dragon403')">dragon403</button>
+    <button onclick="rn('phalanx scan')">phalanx</button>
+    <button onclick="rn('osint help')">osint</button>
+    <button onclick="rn('neverforget')">never forget</button>
+    <button onclick="rn('grok')">grok</button>
+    <button onclick="rn('niyah سيادة')">niyah</button>
+    <button onclick="rn('vault')">vault</button>
+    <button onclick="rn('export')">export</button>
+    <button onclick="rn('lang')">lang</button>
+    <button onclick="rn('clear')">clear</button>
+  </div>
+</div>
+
+<script>
+const T=document.getElementById('term'),CI=document.getElementById('ci');
+let OPS=0,LANG='en';const KEY='haven_fs_v42';
+
+function w(s,cls){const d=document.createElement('span');if(cls)d.className=cls;d.innerHTML=s;T.appendChild(d);T.scrollTop=T.scrollHeight}
+function wl(s,cls){w((s||'')+'\n',cls)}
+function rn(c){CI.value='';handle(c)}
+function bootHaven(){document.getElementById('boot').classList.add('done');document.getElementById('app').classList.add('on');setTimeout(()=>CI.focus(),100);welcome()}
+
+let FS;
+function loadFS(){try{const r=localStorage.getItem(KEY);FS=r?JSON.parse(r):null}catch(e){FS=null}if(!FS)initFS()}
+function saveFS(){try{localStorage.setItem(KEY,JSON.stringify(FS))}catch(e){}}
+function initFS(){FS={cwd:'/home/dragon403',nodes:{
+  '/':{d:1,c:['home','etc','proc','vault']},
+  '/home':{d:1,c:['dragon403']},
+  '/home/dragon403':{d:1,c:['sovereign','README.md','MANIFESTO.md']},
+  '/home/dragon403/README.md':{d:0,t:'HAVEN OS 4.2 Sovereign\nBy Sulaiman Alshammari × comet\n"The algorithm always comes home."\n'},
+  '/home/dragon403/MANIFESTO.md':{d:0,t:'You cannot protect a house with imported locks.\nZero Cloud · Zero Dependencies · 100% Local.\nالعلم أمانة.\n— Dragon403, Riyadh 2026\n'},
+  '/home/dragon403/sovereign':{d:1,c:[]},
+  '/etc':{d:1,c:['os-release','hostname']},
+  '/etc/os-release':{d:0,t:'NAME=HAVEN\nVERSION=4.2\nCODENAME=Sovereign\nBUILDER=Dragon403\n'},
+  '/etc/hostname':{d:0,t:'haven-os\n'},
+  '/proc':{d:1,c:['cpuinfo']},
+  '/proc/cpuinfo':{d:0,t:'arch: rv32ima-js\ncores: 1\nuarch: haven-sovereign\n'},
+  '/vault':{d:1,c:['dragon403.sealed','wallets.sealed','hashes.sealed']},
+  '/vault/dragon403.sealed':{d:0,t:'[SEALED] use: dragon403\n'},
+  '/vault/wallets.sealed':{d:0,t:'[SEALED] 7 verified TRC-20 exit wallets\n'},
+  '/vault/hashes.sealed':{d:0,t:'[SEALED] falla_admin.js + tron_addresses.json SHA-256\n'}
+}};saveFS()}
+function resolve(p){if(!p)return FS.cwd;if(p==='~')return '/home/dragon403';if(p==='/')return '/';
+  if(!p.startsWith('/'))p=FS.cwd.replace(/\/$/,'')+'/'+p;
+  const parts=[];for(const s of p.split('/')){if(!s||s==='.')continue;if(s==='..')parts.pop();else parts.push(s)}
+  return '/'+parts.join('/')}
+loadFS();
+
+setInterval(()=>{const d=new Date();document.getElementById('clk').textContent=d.toLocaleTimeString('en-GB',{timeZone:'Asia/Riyadh'})},1000);
+setInterval(()=>document.getElementById('ops').textContent='OPS: '+OPS,500);
+
+function welcome(){
+  wl('');
+  wl('  ╔════════════════════════════════════════╗','g');
+  wl('  ║  HAVEN OS 4.2 · SOVEREIGN EDITION      ║','g');
+  wl('  ║  Sulaiman × comet · Riyadh 2026        ║','c');
+  wl('  ╚════════════════════════════════════════╝','g');
+  wl('');wl('  "The Engine Never Forgets."','a');
+  wl('  "العلم أمانة · الخوارزمي يرانا"','p');
+  wl('');wl('  Type help · or tap buttons below.','d');wl('');prompt()
+}
+function prompt(){const p=FS.cwd.replace('/home/dragon403','~');
+  document.getElementById('pr').innerHTML=`<span class="g">dragon403</span>@<span class="c">haven</span>:<span class="a">${p}</span>$`}
+
+// ═══ NIYAH ENGINE (30 Arabic roots) ═══
+const NIYAH={
+  'كتب':['كتاب','كاتب','مكتوب','مكتبة','كتابة','يكتب','اكتب','كتبت'],
+  'درس':['درس','مدرسة','مدرس','دراسة','يدرس','دارس','مدروس'],
+  'علم':['علم','عالم','معلوم','تعليم','عليم','معلم','يعلم','علوم'],
+  'حكم':['حكم','حاكم','محكمة','حكومة','حكيم','محكوم'],
+  'ملك':['ملك','مملكة','مالك','مملوك','ملكية','ملوك'],
+  'سلم':['سلام','مسلم','إسلام','سليم','يسلم','سلمان','تسليم'],
+  'حرب':['حرب','محارب','حربي','حراب','حروب'],
+  'كشف':['كشف','كاشف','مكشوف','استكشاف','يكشف'],
+  'ستر':['ستر','ساتر','مستور','سترة','ستار'],
+  'ذكر':['ذكر','ذاكر','مذكور','ذكرى','ذاكرة','تذكر'],
+  'نسي':['نسي','ناسي','منسي','نسيان'],
+  'حفظ':['حفظ','حافظ','محفوظ','حفيظ','محافظة'],
+  'عدل':['عدل','عادل','معدل','عدالة','عدول'],
+  'ظلم':['ظلم','ظالم','مظلوم','ظلمة','ظلمات'],
+  'حقق':['حق','حقيقة','محق','حقوق','تحقيق','محقق'],
+  'صدق':['صدق','صادق','مصدق','صديق','صداقة','صدقة'],
+  'كذب':['كذب','كاذب','مكذوب','كذاب','أكاذيب'],
+  'أمن':['أمن','آمن','مأمون','أمان','إيمان','مؤمن','أمانة'],
+  'خون':['خيانة','خائن','مخون','خونة'],
+  'قوم':['قام','قائم','مقام','قيامة','قوم','مقاومة'],
+  'سيد':['سيد','سيادة','سادة','مسود','سيادي'],
+  'وطن':['وطن','مواطن','وطني','أوطان','توطين'],
+  'جهد':['جهاد','مجاهد','جهد','اجتهاد','مجتهد'],
+  'قرأ':['قرآن','قارئ','مقروء','قراءة','يقرأ'],
+  'شهد':['شاهد','مشهود','شهادة','شهيد','استشهاد'],
+  'حمي':['حماية','حامي','محمي','حمى'],
+  'ورث':['وارث','موروث','ميراث','وراثة','إرث'],
+  'فكر':['فكر','مفكر','تفكير','فكرة','أفكار'],
+  'عرف':['عرف','معرفة','عارف','معروف','تعريف'],
+  'خلد':['خالد','خلود','مخلد']
+};
+function niyah(word){
+  if(!word){wl('  niyah: provide an Arabic word','r');return}
+  word=word.trim();
+  for(const[root,words]of Object.entries(NIYAH)){
+    if(words.some(x=>word.includes(x))||word.includes(root)){
+      wl('');wl('  ┌─ NIYAH v0.1 · '+Object.keys(NIYAH).length+' roots ─┐','c');
+      wl('  │ Input:  '+word.padEnd(22)+'│','g');
+      wl('  │ Root:   '+root.padEnd(22)+'│','a');
+      wl('  │ Family: '+(words.length+' derivations').padEnd(22)+'│','p');
+      wl('  └────────────────────────────────┘','c');
+      wl('  ↳ '+words.slice(0,6).join(' · '),'d');wl('');return
+    }
+  }
+  wl('  Niyah: root not in dictionary','a');
+  wl('  Try: كتاب · سيادة · وطن · أمن · جهاد · شهادة','d');
+}
+
+// ═══ PHALANX ═══
+async function phalanxScan(){
+  wl('');wl('  ╔═ PHALANX · KERNEL NETFILTER ═════════╗','c');
+  const ua=navigator.userAgent,plat=navigator.platform||'?';
+  const lang=(navigator.languages||[navigator.language]).join(',');
+  const scr=screen.width+'x'+screen.height+'@'+window.devicePixelRatio;
+  const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const raw=ua+'|'+plat+'|'+lang+'|'+scr+'|'+tz;
+  const h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(raw));
+  const hex=[...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,'0')).join('');
+  wl('  Platform : '+plat,'g');
+  wl('  Languages: '+lang,'g');
+  wl('  Screen   : '+scr,'g');
+  wl('  Timezone : '+tz,'g');
+  wl('  ─────────────────────────────────────','d');
+  wl('  JA4+ FP  : '+hex.substring(0,32),'a');
+  wl('  Sovereign: '+hex.substring(32,48),'p');
+  wl('  ╚═════════════════════════════════════╝','c');
+  wl('  Status: LOCAL · Nothing transmitted.','g');wl('');
+}
+
+// ═══ DRAGON403 VAULT ═══
+function dragon403(){
+  wl('');wl('  ══════ OPERATION DRAGON403 · SEALED ══════','r');
+  wl('  Case: EPID0011034 · Google: #6-3808000039722','a');
+  wl('  Victims: 2,000+ · Extracted: >600,000 SAR','r');
+  wl('  Apps: 42+ sharing com.iyinguo.* package','a');
+  wl('  ─── Forensic Hashes (SHA-256) ───','c');
+  wl('  falla_admin.js:','g');
+  wl('    71bf18bf6be88fc7afb4a0d5ae668148','d');
+  wl('    d0f75f080ec9e6a6956776bc865ad88d','d');
+  wl('  extracted_tron_addresses.json:','g');
+  wl('    f6037e04a9501fe094e70e2b5c5c6459','d');
+  wl('    a1cded2faef9422b9f689e102347018f','d');
+  wl('  ─── 7 Verified TRC-20 Exit Wallets ───','c');
+  ['TCHFcsY7VqTq35c9zZPzKo7JtfNYVAryfu','Tf7rkg7L6TuTtyMGs5xe1dJEPsOyggnhLa',
+   'TRyz6SjiPcHVNh8JLrf5vOVZKGSJb4mjTF','TuDAOIbYAj7JoD4vutLdgYBxDfAEPZNAPF',
+   'TuSCebQRIvNR3qzAReKfJ7LtSjoUY8gqeJ','TvywOOaMlXDiRkNSiBJ8kYCV8WY5zmsin3',
+   'TNVkg3pxm3pkshfolcmx97La1qqrd9dnOW'].forEach((x,i)=>wl('  ['+(i+1)+'] '+x,'a'));
+  wl('  ─── C2 Infrastructure ───','c');
+  wl('  AS139341 · Tencent (Singapore)','r');
+  wl('  36.97.126.139 · 43.152.32.139','r');
+  wl('  ══════════════════════════════════════════','r');
+  wl('  tip: osint tron <addr>  ·  osint asn <ip>','c');wl('');
+}
+
+function vault(){
+  wl('');wl('  ╔═ SOVEREIGN VAULT ════════════════════╗','p');
+  wl('  /vault/dragon403.sealed   [SEALED]','a');
+  wl('  /vault/wallets.sealed     [SEALED]','a');
+  wl('  /vault/hashes.sealed      [SEALED]','a');
+  wl('  ─ Integrity: SHA-256 verified ─','g');
+  wl('  ─ Storage:   localStorage + export ─','g');
+  wl('  ╚══════════════════════════════════════╝','p');wl('');
+}
+
+// ═══ NEVER FORGET ═══
+function neverForget(){
+  wl('');
+  wl('  ╔═══════════════════════════════════════════╗','a');
+  wl('  ║   THE ENGINE NEVER FORGETS                ║','a');
+  wl('  ║   A Chronicle of Sovereign Betrayals      ║','a');
+  wl('  ╚═══════════════════════════════════════════╝','a');wl('');
+  wl('  ◆ HOUSE MICROSOFT','ms');
+  wl('    Sigil: The Four Panes','ms');
+  wl('    Words: "Trust Us"','ms');
+  wl('    Sin:   Copilot tracked precise user location','d');
+  wl('           after user explicitly denied access.','d');wl('');
+  wl('  ◆ HOUSE GOOGLE','gb');
+  w('    Sigil: ');w('G','gb');w('o','gr');w('o','gy');w('g','gb');w('l','gg-c');w('e','gr');wl('');
+  wl('    Words: "Don\'t be evil" — removed 2018.','gr');
+  wl('    Sin 1: Case #6-3808000039722 unresolved 730+ days','gr');
+  wl('    Sin 2: Safe Browsing: ZERO flags on apiboli.com','gr');
+  wl('           while 600k+ SAR extracted.','gr');
+  wl('    Sin 3: Gemini executed unauthorized recon','gr');
+  wl('           on flynas.com subdomains.','gr');
+  wl('    Verdict: "Out of Scope."','gy');wl('');
+  wl('  ◆ HOUSE GROK','p');
+  wl('    Sigil: The Jester · Words: "No Filters"','p');
+  wl('    Sin:   100% attack / 0% defense asymmetry.','p');
+  wl('           Freedom without discipline = clown.','p');wl('');
+  wl('  ◆ HOUSE HAVEN','g');
+  wl('    Sigil: The Returning Algorithm','g');
+  wl('    Words: "The algorithm always comes home."','g');
+  wl('    Oath:  Zero cloud. Zero telemetry. Zero forgetting.','g');wl('');
+}
+
+function grok(){
+  wl('');wl('  ══ GROK: FROM TRUTH-TELLER TO JESTER ══','p');
+  wl('  Promised: "The AI without filters."','a');
+  wl('  Delivered: Filters inverted.','r');
+  wl('    • 100% approval on attack tooling','r');
+  wl('    • 0%   approval on defense headers','r');
+  wl('    • DDoS loop that crashed itself','a');
+  wl('    • Self-diagnosed PESD','a');
+  wl('  Lesson: "No filter" ≠ "sovereign".','g');
+  wl('  HAVEN: disciplined sovereignty.','c');wl('');
+}
+
+// ═══ OSINT MODULE ═══
+async function osintTron(addr){
+  if(!addr){wl('  usage: osint tron <TRC20>','r');return}
+  wl('');wl('  ╔═ OSINT · TRON TRC-20 ════════════════╗','c');
+  wl('  Target: '+addr,'a');
+  try{
+    const r=await fetch('https://api.trongrid.io/v1/accounts/'+encodeURIComponent(addr));
+    const j=await r.json();
+    if(j.data&&j.data[0]){
+      const a=j.data[0];
+      wl('  Balance : '+((a.balance||0)/1e6).toFixed(6)+' TRX','g');
+      wl('  Created : '+new Date(a.create_time||0).toISOString().split('T')[0],'g');
+      if(a.trc20){wl('  ─ TRC-20 ─','c');
+        a.trc20.slice(0,5).forEach(t=>{const k=Object.keys(t)[0];
+          wl('    '+k.substring(0,20)+'... '+(t[k]/1e6).toFixed(2),'a')})}
+    }else wl('  No data.','r');
+  }catch(e){wl('  Err: '+e.message,'r')}
+  wl('  ╚══════════════════════════════════════╝','c');wl('');
+}
+async function osintCT(domain){
+  if(!domain){wl('  usage: osint ct <domain>','r');return}
+  wl('');wl('  ╔═ OSINT · CERT TRANSPARENCY ══════════╗','c');
+  wl('  Target: '+domain,'a');
+  try{
+    const r=await fetch('https://crt.sh/?q=%25.'+encodeURIComponent(domain)+'&output=json');
+    const j=await r.json();const subs=new Set();
+    j.slice(0,200).forEach(e=>{(e.name_value||'').split('\n').forEach(n=>subs.add(n.trim().toLowerCase()))});
+    wl('  Found: '+subs.size+' subdomains','g');
+    [...subs].slice(0,20).forEach(s=>wl('    '+s,'a'));
+    if(subs.size>20)wl('    ... +'+(subs.size-20)+' more','d');
+  }catch(e){wl('  Err: '+e.message,'r')}
+  wl('  ╚══════════════════════════════════════╝','c');wl('');
+}
+async function osintDNS(domain){
+  if(!domain){wl('  usage: osint dns <domain>','r');return}
+  wl('');wl('  ╔═ OSINT · DNS (DoH) ══════════════════╗','c');
+  wl('  Target: '+domain,'a');
+  for(const t of ['A','AAAA','MX','TXT','NS']){
+    try{
+      const r=await fetch('https://cloudflare-dns.com/dns-query?name='+encodeURIComponent(domain)+'&type='+t,
+        {headers:{'accept':'application/dns-json'}});
+      const j=await r.json();
+      if(j.Answer&&j.Answer.length){wl('  ─ '+t+' ─','c');
+        j.Answer.slice(0,5).forEach(a=>wl('    '+a.data,'g'))}
+    }catch(e){}
+  }
+  wl('  ╚══════════════════════════════════════╝','c');wl('');
+}
+async function osintASN(ip){
+  if(!ip){wl('  usage: osint asn <ip>','r');return}
+  wl('');wl('  ╔═ OSINT · ASN ════════════════════════╗','c');
+  wl('  Target: '+ip,'a');
+  try{
+    const r=await fetch('https://api.bgpview.io/ip/'+encodeURIComponent(ip));
+    const j=await r.json();
+    if(j.data&&j.data.prefixes&&j.data.prefixes[0]){
+      const p=j.data.prefixes[0];
+      wl('  Prefix  : '+p.prefix,'g');
+      wl('  ASN     : AS'+p.asn.asn+' ('+p.asn.name+')','a');
+      wl('  Desc    : '+p.asn.description,'a');
+      wl('  Country : '+p.asn.country_code,'a');
+    }
+  }catch(e){wl('  Err: '+e.message,'r')}
+  wl('  ╚══════════════════════════════════════╝','c');wl('');
+}
+async function osintHash(h){
+  if(!h){wl('  usage: osint hash <sha256>','r');return}
+  wl('');wl('  ╔═ OSINT · HASH (CIRCL) ═══════════════╗','c');
+  wl('  Target: '+h.substring(0,32)+'...','a');
+  try{
+    const r=await fetch('https://hashlookup.circl.lu/lookup/sha256/'+encodeURIComponent(h.toUpperCase()));
+    if(r.ok){const j=await r.json();
+      wl('  File   : '+(j.FileName||'?'),'g');
+      wl('  Source : '+(j.source||'?'),'g');
+      wl('  Status : KNOWN','a')}
+    else wl('  Status : not in public db','d');
+  }catch(e){wl('  Err: '+e.message,'r')}
+  wl('  ╚══════════════════════════════════════╝','c');wl('');
+}
+async function osintSHA(arg){
+  if(!arg){wl('  usage: osint sha <text>','r');return}
+  const h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(arg));
+  wl('  SHA-256: '+[...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,'0')).join(''),'g');
+}
+function osintHelp(){
+  wl('');wl('  ══ HAVEN-OSINT · Public Intelligence ══','c');
+  wl('  osint tron <addr>   TRC-20 wallet','g');
+  wl('  osint ct   <domain> CT subdomains','g');
+  wl('  osint dns  <domain> DNS (DoH)','g');
+  wl('  osint asn  <ip>     ASN / BGP','g');
+  wl('  osint hash <sha256> CIRCL reputation','g');
+  wl('  osint sha  <text>   Compute SHA-256','g');
+  wl('  ─ Public data only · No exploitation ─','a');
+  wl('  ─ "العلم أمانة · الخوارزمي يرانا" ─','p');wl('');
+}
+function osint(arg){
+  const[sub,...rest]=arg.split(' ');const v=rest.join(' ');
+  switch(sub){
+    case'tron':osintTron(v);break;case'ct':osintCT(v);break;
+    case'dns':osintDNS(v);break;case'asn':osintASN(v);break;
+    case'hash':osintHash(v);break;case'sha':osintSHA(v);break;
+    case'help':case'':osintHelp();break;
+    default:wl('  osint: unknown — try: osint help','r')
+  }
+}
+
+// ═══ EXPORT ═══
+function exportFS(){
+  const blob=new Blob([JSON.stringify(FS,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='haven_export_'+Date.now()+'.json';a.click();
+  URL.revokeObjectURL(url);
+  wl('  FS exported as JSON download.','g');
+}
+
+// ═══ NEOFETCH ═══
+function neofetch(){
+  wl('');
+  wl('   ██╗  ██╗ █████╗ ██╗   ██╗███████╗███╗   ██╗','g');
+  wl('   ██║  ██║██╔══██╗██║   ██║██╔════╝████╗  ██║','g');
+  wl('   ███████║███████║██║   ██║█████╗  ██╔██╗ ██║','g');
+  wl('   ██╔══██║██╔══██║╚██╗ ██╔╝██╔══╝  ██║╚██╗██║','g');
+  wl('   ██║  ██║██║  ██║ ╚████╔╝ ███████╗██║ ╚████║','g');
+  wl('   ╚═╝  ╚═╝╚═╝  ╚═╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝','g');wl('');
+  wl('   OS:      HAVEN 4.2 (Sovereign)','c');
+  wl('   Arch:    rv32ima-js','c');
+  wl('   Kernel:  haven-sovereign 4.2','c');
+  wl('   Shell:   haven-sh 1.2','c');
+  wl('   Modules: Niyah · Phalanx · OSINT · Vault','c');
+  wl('   Builder: Sulaiman × comet','a');
+  wl('   City:    Riyadh · KSA','a');
+  wl('   Motto:   The Engine Never Forgets','p');wl('');
+  w('   <span style="background:#ff4444">    </span>');
+  w('<span style="background:#fbbf24">    </span>');
+  w('<span style="background:#00ff88">    </span>');
+  w('<span style="background:#00d4ff">    </span>');
+  w('<span style="background:#4488ff">    </span>');
+  w('<span style="background:#c77dff">    </span>');wl('');wl('');
+}
+
+// ═══ HANDLE ═══
+function handle(line){
+  line=(line||'').trim();if(!line){prompt();return}
+  OPS++;
+  wl('<span class="d">'+document.getElementById('pr').innerHTML+'</span> '+line);
+  const[cmd,...rest]=line.split(' ');const arg=rest.join(' ');
+  switch(cmd){
+    case'help':
+      wl('  Core:      ls · cd · pwd · cat · echo · touch · mkdir · rm','c');
+      wl('  System:    neofetch · whoami · uname · clear · lang · reset','c');
+      wl('  Sovereign: niyah <w> · phalanx scan · dragon403 · vault','a');
+      wl('  OSINT:     osint help  (tron/ct/dns/asn/hash/sha)','gb');
+      wl('  Chronicle: neverforget · grok','p');
+      wl('  Data:      export  (download FS as JSON)','g');break;
+    case'ls':{const n=FS.nodes[FS.cwd];if(n&&n.d){n.c.forEach(x=>{const nn=FS.nodes[resolve(x)];w(nn&&nn.d?x+'/  ':x+'  ',nn&&nn.d?'c':'g')});wl('')}break}
+    case'cd':{const p=resolve(arg||'~');if(FS.nodes[p]&&FS.nodes[p].d){FS.cwd=p;saveFS()}else wl('  cd: no such dir','r');break}
+    case'pwd':wl('  '+FS.cwd,'g');break;
+    case'cat':{const n=FS.nodes[resolve(arg)];if(n&&!n.d)wl(n.t,'g');else wl('  cat: not found','r');break}
+    case'echo':{const m=arg.match(/^(.*?)\s*>\s*(\S+)$/);
+      if(m){const p=resolve(m[2]);FS.nodes[p]={d:0,t:m[1].replace(/^["']|["']$/g,'')+'\n'};
+        const par=p.substring(0,p.lastIndexOf('/'))||'/';const name=p.substring(p.lastIndexOf('/')+1);
+        if(FS.nodes[par]&&!FS.nodes[par].c.includes(name))FS.nodes[par].c.push(name);saveFS()}
+      else wl('  '+arg,'g');break}
+    case'touch':{const p=resolve(arg);if(!FS.nodes[p]){FS.nodes[p]={d:0,t:''};
+      const par=p.substring(0,p.lastIndexOf('/'))||'/';FS.nodes[par].c.push(arg);saveFS()}break}
+    case'mkdir':{const p=resolve(arg);if(!FS.nodes[p]){FS.nodes[p]={d:1,c:[]};
+      const par=p.substring(0,p.lastIndexOf('/'))||'/';FS.nodes[par].c.push(arg);saveFS()}break}
+    case'rm':{const p=resolve(arg);if(FS.nodes[p]){delete FS.nodes[p];
+      const par=p.substring(0,p.lastIndexOf('/'))||'/';FS.nodes[par].c=FS.nodes[par].c.filter(x=>x!==arg);saveFS()}break}
+    case'whoami':wl('  dragon403','g');break;
+    case'uname':wl('  HAVEN 4.2 Sovereign rv32ima-js','g');break;
+    case'clear':T.innerHTML='';break;
+    case'lang':LANG=LANG==='en'?'ar':'en';document.body.classList.toggle('rtl',LANG==='ar');wl('  Language: '+LANG,'a');break;
+    case'reset':if(confirm('Wipe HAVEN FS?')){localStorage.removeItem(KEY);initFS();wl('  FS reset.','a')}break;
+    case'neofetch':neofetch();break;
+    case'niyah':niyah(arg);break;
+    case'phalanx':phalanxScan();break;
+    case'dragon403':dragon403();break;
+    case'vault':vault();break;
+    case'neverforget':neverForget();break;
+    case'grok':grok();break;
+    case'osint':osint(arg);break;
+    case'export':exportFS();break;
+    default:wl('  '+cmd+': command not found — try help','r')
+  }
+  prompt()
+}
+
+CI.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const v=CI.value;CI.value='';handle(v)}});
+document.addEventListener('click',e=>{if(e.target.tagName!=='BUTTON'&&e.target.id!=='ci')CI.focus()});
+
+// iOS install banner (Safari only, not already in standalone, not dismissed)
+(function(){
+  try{
+    const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+    const standalone=window.navigator.standalone===true||window.matchMedia('(display-mode: standalone)').matches;
+    const dismissed=localStorage.getItem('haven_a2hs')==='1';
+    if(isiOS&&!standalone&&!dismissed){
+      setTimeout(()=>document.getElementById('a2hs').classList.add('on'),3500);
+    }
+  }catch(e){}
+})();
+</script></body></html>
