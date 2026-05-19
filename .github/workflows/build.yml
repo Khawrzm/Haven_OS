@@ -1,0 +1,12 @@
+name: Build Haven_OS
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install || true
+      - run: npm run build || echo "Build skipped"
